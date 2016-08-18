@@ -61,10 +61,17 @@
             if(frameData.media){
                 css = "@media " + frameData.media + "{" + css + "}";
             }
+            var $frameStyle;
+            try {
+                $frameStyle = $("style#" + frameData.name);
+            }
+            catch(err) {
+                
+            } 
 
-            var $frameStyle = $("style#" + frameData.name);
+           
 
-            if ($frameStyle.length > 0) {
+            if ($frameStyle && $frameStyle.length > 0) {
                 $frameStyle.html(css);
 
                 var $elems = $("*").filter(function() {
@@ -163,7 +170,22 @@
         };
 
         this.each(function() {
-            var $el = $(this).addClass("boostKeyframe").css(vendorPrefix + animationPlayState, playStateRunning).css(animationkey, animationcss).data("keyframeOptions", frameOptions);
+            var $el = $(this);
+            $el.addClass("boostKeyframe");
+            $el.css(vendorPrefix + animationPlayState, playStateRunning);
+            $el.css(animationkey, animationcss);
+            
+            /* Work around when css is not applied immediately */ 
+            var testCss = $el.css(animationkey);
+            var i =0;
+            while(i<100){
+                if(testCss){ break;}
+                $el.css(animationkey, animationcss);
+                testCss = $el.css(animationkey);
+                i++;
+            }
+
+            $($el).first().data("keyframeOptions", frameOptions);
             if($.keyframe.debug){
                 console.group();
                 if(vendorPrefix){ console.log("Vendor Prefix: " + vendorPrefix); }
